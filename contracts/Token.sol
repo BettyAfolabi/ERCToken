@@ -10,7 +10,7 @@ contract ERC20Token {
     uint8 public decimals;
 
     mapping(address => uint256) balances;
-    mapping(address => uint256) allowances;
+    mapping(address => mapping(address => uint256)) allowances;
 
     constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
         name = _name;
@@ -34,19 +34,21 @@ contract ERC20Token {
 
     function approve(address spender, uint256 amount) external returns(bool) {
         require(spender != address(0), "False address");
-        allowances[spender] = amount;
+        allowances[msg.sender][spender] = amount;
         return true;
     }
 
     function transferFrom(address receiver, uint256 amount, address spender) external returns(bool) {
         require(receiver != address(0), "Address is not correct");
         require(balances[msg.sender] > 0, "Insufficient balance");
-        balances[msg.sender] -= allowances[spender];
+        require(allowances[msg.sender][spender] >= amount, "Amount mismatch"); //shouldn't the amount be exactly equal to how what the spender sends?
+        balances[msg.sender] -= amount; 
+        allowances[msg.sender][spender] -= amount;
         balances[receiver] += (amount);
         return true;
     }
 
     function allowance(address spender) external view returns(uint256) {
-        return allowances[spender];
+        return allowances[msg.sender][spender];
     }
 }
