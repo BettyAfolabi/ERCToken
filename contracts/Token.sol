@@ -18,6 +18,7 @@ contract ERC20Token {
         decimals = _decimals;
         totalSupply = _totalSupply;
         owner = msg.sender;
+        balances[msg.sender] = _totalSupply;
     }
 
     function balanceOf(address account) external view returns(uint256) {
@@ -38,12 +39,12 @@ contract ERC20Token {
         return true;
     }
 
-    function transferFrom(address receiver, uint256 amount, address spender) external returns(bool) {
+    function transferFrom(address from, address receiver, uint256 amount ) external returns(bool) {
         require(receiver != address(0), "Address is not correct");
-        require(balances[msg.sender] > 0, "Insufficient balance");
-        require(allowances[msg.sender][spender] >= amount, "Amount mismatch"); //shouldn't the amount be exactly equal to how what the spender sends?
-        balances[msg.sender] -= amount; 
-        allowances[msg.sender][spender] -= amount;
+        require(balances[from] > 0, "Insufficient balance");
+        require(allowances[from][msg.sender] >= amount, "Amount mismatch"); 
+        balances[from] -= amount;
+        allowances[from][msg.sender] -= amount;
         balances[receiver] += (amount);
         return true;
     }
